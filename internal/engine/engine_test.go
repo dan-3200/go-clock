@@ -138,3 +138,24 @@ func TestAlertFailureAndSaveRetry(t *testing.T) {
 		t.Fatal("save was not retried")
 	}
 }
+
+func TestCompletionPlaysSound(t *testing.T) {
+	a, _, _ := setup()
+	calls := 0
+	a.sound = func() error {
+		calls++
+		return nil
+	}
+
+	a, cmd := complete(a)
+	batch := cmd().(tea.BatchMsg)
+	for _, command := range batch {
+		msg := command()
+		model, _ := a.Update(msg)
+		a = model.(App)
+	}
+
+	if calls != 1 {
+		t.Fatalf("sound calls = %d, want 1", calls)
+	}
+}
